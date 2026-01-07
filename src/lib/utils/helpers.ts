@@ -1,4 +1,4 @@
-import { AQICategoryInfo } from './types';
+import { AQICategoryInfo } from '@/lib/types';
 
 /**
  * Get AQI category and styling information based on AQI value
