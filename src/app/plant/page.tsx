@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
 import { useAuth } from '@/lib/auth-context';
 import { createImagePreview, revokeImagePreview, validateImageFile } from '@/lib/utils/storage';
 import { DistrictSearchResult } from '@/lib/types';
 import { DistrictSearch } from '@/components/ui/district-search';
+import { Leaf, Camera, MapPin, Award, Info, CheckCircle, UploadCloud, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 function PlantPageContent() {
     const router = useRouter();
@@ -108,6 +109,9 @@ function PlantPageContent() {
             formData.append('state', selectedDistrict.state);
             formData.append('treeName', treeName.trim());
             formData.append('treeQuantity', treeQuantity.toString());
+            // Default contributionType is 'plantation' for this page
+            formData.append('contributionType', 'plantation');
+
             if (user?.uid) formData.append('userId', user.uid);
             if (user?.displayName) formData.append('userName', user.displayName);
             if (user?.email) formData.append('userEmail', user.email);
@@ -130,7 +134,7 @@ function PlantPageContent() {
             setTreeName('');
             setTreeQuantity(1);
             setSelectedDistrict(null);
-            
+
             // Redirect to contribution page after 2 seconds
             setTimeout(() => {
                 router.push('/contribution');
@@ -146,173 +150,254 @@ function PlantPageContent() {
         return (
             <>
                 <Header />
-                <div className="min-h-screen flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                 </div>
             </>
         );
     }
 
-    if (!user) {
-        return null;
-    }
+    // Allow rendering the layout (will redirect if !user in useEffect)
+    if (!user) return null;
 
     return (
-        <>
+        <div className="min-h-screen bg-gray-50 text-gray-900">
             <Header />
-            <main className="min-h-screen bg-white">
-                <section className="pt-20 pb-12 px-6">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">
-                                Plant a Tree
-                            </h1>
-                            <p className="text-gray-500 text-sm">
-                                Upload photo and details of trees you planted
-                            </p>
+
+            {/* Hero Section */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-6 py-12">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Plant & Earn
+                    </h1>
+                    <p className="text-gray-600 max-w-2xl">
+                        Plant trees, upload proof, and track oxygen production to climb the leaderboard.
+                    </p>
+                </div>
+            </div>
+
+            <main className="max-w-7xl mx-auto px-6 py-8">
+                <div className="flex flex-col lg:flex-row gap-8">
+
+                    {/* Left Column: Information & Guidelines */}
+                    <div className="lg:w-2/3 space-y-6">
+
+                        {/* How it Works Card */}
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+                                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <Leaf className="w-5 h-5 text-nature-600" />
+                                    How it Works
+                                </h2>
+                            </div>
+                            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="text-center">
+                                    <div className="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-green-600">
+                                        <Leaf className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-900 mb-1">1. Plant a Tree</h3>
+                                    <p className="text-sm text-gray-500">Plant a tree in your local area or backyard.</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600">
+                                        <Camera className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-900 mb-1">2. Upload Proof</h3>
+                                    <p className="text-sm text-gray-500">Take a photo and upload it here for verification.</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="bg-amber-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-600">
+                                        <Award className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-900 mb-1">3. Track Oxygen</h3>
+                                    <p className="text-sm text-gray-500">See how much oxygen your trees produce based on species.</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-                            {/* District Selection */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    District
-                                </label>
-                                <DistrictSearch
-                                    onDistrictSelect={(district) => {
-                                        setSelectedDistrict(district);
-                                        setError(null);
-                                    }}
-                                />
-                                {selectedDistrict && (
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        Selected: {selectedDistrict.name}, {selectedDistrict.state}
+                        {/* Guidelines Card */}
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+                                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5 text-nature-600" />
+                                    Submission Guidelines
+                                </h2>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="flex gap-3">
+                                    <Camera className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-900">Clear Photos Required</h3>
+                                        <p className="text-sm text-gray-500">Ensure the sapling is clearly visible. Avoid blurry or dark images.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-900">Correct Location</h3>
+                                        <p className="text-sm text-gray-500">Select the district where the tree was actually planted.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <AlertCircle className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-900">No Fakes</h3>
+                                        <p className="text-sm text-gray-500">Stock images or duplicate submissions will be rejected by our AI verification system.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* AI Message */}
+                        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                            <div className="flex gap-3">
+                                <Info className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                <div>
+                                    <h3 className="text-sm font-semibold text-blue-900 mb-1">Powered by AI</h3>
+                                    <p className="text-xs text-blue-800 leading-relaxed">
+                                        Vayura uses Gemini Vision AI to analyze tree species, estimate age, and calculate potential oxygen production.
                                     </p>
-                                )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* Right Column: Submission Form */}
+                    <div className="lg:w-1/3">
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sticky top-8">
+                            <div className="mb-6">
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">Submission Form</h2>
+                                <p className="text-sm text-gray-600">
+                                    Fill in the details below.
+                                </p>
                             </div>
 
-                            {/* Tree Quantity */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Number of Trees
-                                </label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={treeQuantity}
-                                    onChange={(e) => setTreeQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-1 focus:ring-gray-900 focus:border-gray-900 outline-none text-sm text-gray-900 bg-white"
-                                    placeholder="Enter number of trees"
-                                />
-                            </div>
-
-                            {/* Tree Name */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Tree Name / Species
-                                </label>
-                                <input
-                                    type="text"
-                                    value={treeName}
-                                    onChange={(e) => setTreeName(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-1 focus:ring-gray-900 focus:border-gray-900 outline-none text-sm text-gray-900 bg-white"
-                                    placeholder="e.g., Neem, Mango, Banyan, Peepal"
-                                />
-                            </div>
-
-                            {/* Image Upload with Drag and Drop */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Tree Photo
-                                </label>
-                                <div
-                                    ref={dropZoneRef}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                                        isDragging
-                                            ? 'border-gray-900 bg-gray-50'
-                                            : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                                >
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/jpeg,image/png,image/webp"
-                                        onChange={handleImageChange}
-                                        className="hidden"
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                {/* District Selection */}
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5">
+                                        District
+                                    </label>
+                                    <DistrictSearch
+                                        onDistrictSelect={(district) => {
+                                            setSelectedDistrict(district);
+                                            setError(null);
+                                        }}
                                     />
-                                    {previewUrl ? (
-                                        <div className="space-y-3">
-                                            <img
-                                                src={previewUrl}
-                                                alt="Tree preview"
-                                                className="mx-auto rounded-lg max-h-64 object-cover"
-                                            />
-                                            <p className="text-sm text-gray-600">
-                                                Click to change photo
-                                            </p>
-                                        </div>
+                                    {selectedDistrict ? (
+                                        <p className="mt-1.5 text-xs text-green-600 font-medium truncate">
+                                            📍 {selectedDistrict.name}, {selectedDistrict.state}
+                                        </p>
                                     ) : (
-                                        <div className="space-y-2">
-                                            <svg
-                                                className="mx-auto h-12 w-12 text-gray-400"
-                                                stroke="currentColor"
-                                                fill="none"
-                                                viewBox="0 0 48 48"
-                                            >
-                                                <path
-                                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                                    strokeWidth={2}
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                />
-                                            </svg>
-                                            <div>
-                                                <p className="text-sm text-gray-600">
-                                                    <span className="font-medium">Click to upload</span> or drag and drop
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    PNG, JPG, WEBP up to 10MB
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <p className="mt-1.5 text-xs text-gray-500">Where was it planted?</p>
                                     )}
                                 </div>
-                            </div>
 
-                            {error && (
-                                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                                    {error}
+                                {/* Tree Name & Quantity Row */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5">
+                                            Species
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={treeName}
+                                            onChange={(e) => setTreeName(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-gray-900 focus:border-gray-900 outline-none text-sm text-gray-900 bg-white"
+                                            placeholder="e.g. Neem"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5">
+                                            Quantity
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={treeQuantity}
+                                            onChange={(e) => setTreeQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-gray-900 focus:border-gray-900 outline-none text-sm text-gray-900 bg-white"
+                                            placeholder="Qty"
+                                        />
+                                    </div>
                                 </div>
-                            )}
 
-                            {success && (
-                                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                                    {success}
+                                {/* Image Upload */}
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5">
+                                        Photo Evidence
+                                    </label>
+                                    <div
+                                        ref={dropZoneRef}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${isDragging
+                                            ? 'border-gray-900 bg-gray-50'
+                                            : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                    >
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/webp"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                        {previewUrl ? (
+                                            <div className="space-y-2">
+                                                <img
+                                                    src={previewUrl}
+                                                    alt="Tree preview"
+                                                    className="mx-auto rounded-lg max-h-32 object-contain"
+                                                    draggable={false}
+                                                />
+                                                <p className="text-xs text-gray-500">Click to change</p>
+                                            </div>
+                                        ) : (
+                                            <div className="py-2">
+                                                <UploadCloud className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                                                <p className="text-xs text-gray-600">
+                                                    <span className="font-medium underline">Upload</span> or drop
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            )}
 
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                                <p className="text-xs text-gray-500 max-w-xs">
-                                    By submitting, you confirm this photo is authentic and consent to its use for impact reporting.
-                                </p>
+                                {error && (
+                                    <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {success && (
+                                    <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
+                                        {success}
+                                    </div>
+                                )}
+
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    {submitting ? 'Submitting...' : 'Submit'}
+                                    {submitting ? 'Analyzing & Submitting...' : 'Submit Contribution'}
                                 </button>
-                            </div>
-                        </form>
+
+                                <p className="text-[10px] text-gray-400 text-center">
+                                    By submitting, you agree to our terms and confirm this photo is authentic.
+                                </p>
+                            </form>
+                        </div>
                     </div>
-                </section>
+
+                </div>
             </main>
             <Footer />
-        </>
+        </div>
     );
 }
 
@@ -321,8 +406,8 @@ export default function PlantPage() {
         <Suspense fallback={
             <>
                 <Header />
-                <div className="min-h-screen flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                 </div>
                 <Footer />
             </>
@@ -331,4 +416,3 @@ export default function PlantPage() {
         </Suspense>
     );
 }
-

@@ -94,6 +94,13 @@ export interface LeaderboardEntry {
     createdAt?: Date;
 }
 
+export interface AggregatedStats {
+    totalDistricts: number;
+    totalTrees: number;
+    totalOxygen: number;
+    lastUpdated: Date;
+}
+
 // Firestore collection names
 export const Collections = {
     DISTRICTS: 'districts',
@@ -101,4 +108,5 @@ export const Collections = {
     TREE_CONTRIBUTIONS: 'tree_contributions',
     DONATIONS: 'donations',
     LEADERBOARD: 'leaderboard',
+    AGGREGATED_STATS: 'aggregated_stats',
 } as const;

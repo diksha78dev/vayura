@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { TreeContribution, Donation } from '@/lib/types';
 
+// Cache for 1 minute (60 seconds) - shorter cache for user-specific data
+export const revalidate = 60;
+
 function timestampToDate(value: any): Date {
     if (!value) return new Date();
     if (typeof value.toDate === 'function') return value.toDate();
@@ -20,11 +23,11 @@ export async function GET(request: Request) {
             );
         }
 
-        // Fetch user's tree contributions
-        // Note: We fetch all and sort in memory to avoid composite index requirement
+        // Fetch user's tree contributions (limit to 100 to prevent quota spikes)
         const contributionsRef = adminDb.collection('tree_contributions');
         const contributionsSnap = await contributionsRef
             .where('userId', '==', userId)
+            .limit(100)
             .get();
 
         const contributions: TreeContribution[] = contributionsSnap.docs.map((doc) => {
@@ -45,12 +48,14 @@ export async function GET(request: Request) {
         // Fetch user's donations (by email or userId)
         const userEmail = searchParams.get('userEmail');
         let donationsSnap;
-        
+
         if (userEmail) {
             const donationsRef = adminDb.collection('donations');
             // Fetch without orderBy to avoid index requirement, sort in memory
+            // Limit to 100 to prevent quota spikes
             donationsSnap = await donationsRef
                 .where('donorEmail', '==', userEmail)
+                .limit(100)
                 .get();
         } else {
             // If no email, return empty donations
@@ -74,12 +79,12 @@ export async function GET(request: Request) {
         const verifiedContributions = contributions.filter(c => c.status === 'VERIFIED');
         const pendingContributions = contributions.filter(c => c.status === 'PENDING');
         const rejectedContributions = contributions.filter(c => c.status === 'REJECTED');
-        
+
         // Sum tree quantities from verified contributions
         const totalTreesPlanted = verifiedContributions.reduce((sum, c) => sum + (c.treeQuantity || 1), 0);
         const totalTreesDonated = donations.reduce((sum, d) => sum + (d.treeCount || 0), 0);
         const totalTrees = totalTreesPlanted + totalTreesDonated;
-        
+
         // Calculate O2 impact: use totalLifespanO2 if available, otherwise fallback to annual calculation
         const totalO2Impact = verifiedContributions.reduce((sum, c) => {
             if (c.totalLifespanO2) {
@@ -92,19 +97,24 @@ export async function GET(request: Request) {
         // Get district names for contributions
         const districtIds = [...new Set(contributions.map(c => c.districtId))];
         const districtsMap = new Map<string, string>();
-        
-        // Fetch districts by their document IDs
-        for (const districtId of districtIds) {
+
+
+        // Batch fetch districts to reduce quota usage
+        if (districtIds.length > 0) {
             try {
-                const districtDoc = await adminDb.collection('districts').doc(districtId).get();
-                if (districtDoc.exists) {
-                    districtsMap.set(districtId, districtDoc.data()?.name || 'Unknown');
-                } else {
-                    districtsMap.set(districtId, 'Unknown');
-                }
+                const districtRefs = districtIds.map(id => adminDb.collection('districts').doc(id));
+                const districtDocs = await adminDb.getAll(...districtRefs);
+
+                districtDocs.forEach((doc) => {
+                    if (doc.exists) {
+                        districtsMap.set(doc.id, doc.data()?.name || 'Unknown');
+                    } else {
+                        districtsMap.set(doc.id, 'Unknown');
+                    }
+                });
             } catch (error) {
-                console.error(`Error fetching district ${districtId}:`, error);
-                districtsMap.set(districtId, 'Unknown');
+                console.error('Error batch fetching districts:', error);
+                districtIds.forEach(id => districtsMap.set(id, 'Unknown'));
             }
         }
 

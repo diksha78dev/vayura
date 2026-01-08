@@ -146,7 +146,7 @@ Be factual and conservative in estimates. If image quality is poor, use standard
 
         const data = await response.json();
         const text = data.candidates[0]?.content?.parts[0]?.text;
-        
+
         if (!text) {
             return null;
         }
@@ -159,7 +159,7 @@ Be factual and conservative in estimates. If image quality is poor, use standard
         }
 
         const matrix = JSON.parse(jsonMatch[0]) as TreeAnalysisMatrix;
-        
+
         // Ensure required fields
         if (!matrix.treeName || !matrix.totalLifespanO2) {
             // Fallback calculation if Gemini didn't provide totalLifespanO2
@@ -239,7 +239,7 @@ export async function POST(request: Request) {
         // Save only the evaluated matrix to Firestore (no image storage)
         try {
             const contribRef = adminDb.collection('tree_contributions').doc();
-            
+
             // Build document data, excluding undefined values
             const docData: any = {
                 districtId,
@@ -276,6 +276,9 @@ export async function POST(request: Request) {
             if (userEmail) {
                 docData.userEmail = userEmail;
             }
+            // Capture contribution type ('plantation' or 'donation'), defaulting to 'plantation'
+            const contributionType = formData.get('contributionType') as string || 'plantation';
+            docData.type = contributionType;
 
             await contribRef.set(docData);
 
@@ -298,7 +301,7 @@ export async function POST(request: Request) {
         const errorStack = error?.stack || '';
         console.error('Error details:', { errorMessage, errorStack });
         return NextResponse.json(
-            { 
+            {
                 error: 'Failed to submit contribution',
                 details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
             },

@@ -9,12 +9,14 @@ import { DistrictSearch } from '@/components/ui/district-search';
 import { DistrictResults } from '@/components/ui/district-results';
 import { formatCompactNumber } from '@/lib/utils/helpers';
 import { DistrictSearchResult, DistrictDetail } from '@/lib/types';
+import { TreeDeciduous, Heart, Wind } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [userStats, setUserStats] = useState({
     totalTreesPlanted: 0,
+    totalTreesDonated: 0,
     totalTrees: 0,
     totalO2Impact: 0,
     verifiedContributions: 0,
@@ -35,13 +37,14 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchUserStats() {
       if (!user) return;
-      
+
       try {
         const response = await fetch(`/api/contribution?userId=${user.uid}&userEmail=${encodeURIComponent(user.email || '')}`);
         if (response.ok) {
           const data = await response.json();
           setUserStats({
             totalTreesPlanted: data.stats?.totalTreesPlanted || 0,
+            totalTreesDonated: data.stats?.totalTreesDonated || 0,
             totalTrees: data.stats?.totalTrees || 0,
             totalO2Impact: data.stats?.totalO2Impact || 0,
             verifiedContributions: data.stats?.verifiedContributions || 0,
@@ -88,31 +91,53 @@ export default function Dashboard() {
             </div>
 
             {/* User Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                <p className="text-xs text-gray-500 mb-1">Trees Planted</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {userStats.totalTreesPlanted}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {userStats.verifiedContributions} verified
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-500">Trees Planted</h3>
+                  <div className="bg-green-50 p-2 rounded-lg">
+                    <TreeDeciduous className="w-5 h-5 text-green-600" />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-gray-900">{userStats.totalTreesPlanted}</p>
+                  <span className="text-sm text-gray-500">trees</span>
+                </div>
+                <p className="text-xs text-green-600 mt-2 font-medium">
+                  {userStats.verifiedContributions > 0 ? `${userStats.verifiedContributions} verified` : 'Start planting!'}
                 </p>
               </div>
 
-              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                <p className="text-xs text-gray-500 mb-1">Total Trees</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {userStats.totalTrees}
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-500">Trees Donated</h3>
+                  <div className="bg-amber-50 p-2 rounded-lg">
+                    <Heart className="w-5 h-5 text-amber-600" />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-gray-900">{userStats.totalTreesDonated}</p>
+                  <span className="text-sm text-gray-500">supported</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Via trusted NGOs
                 </p>
               </div>
 
-              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                <p className="text-xs text-gray-500 mb-1">O₂ Impact</p>
-                <p className="text-2xl font-semibold text-gray-900">
-                  {formatCompactNumber(userStats.totalO2Impact)}
-                  <span className="text-sm ml-1 text-gray-500">kg</span>
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-500">Lifetime Oxygen</h3>
+                  <div className="bg-blue-50 p-2 rounded-lg">
+                    <Wind className="w-5 h-5 text-blue-600" />
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-gray-900">{formatCompactNumber(userStats.totalO2Impact)}</p>
+                  <span className="text-sm text-gray-500">kg</span>
+                </div>
+                <p className="text-xs text-blue-600 mt-2 font-medium">
+                  Estimated impact
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Lifespan total</p>
               </div>
             </div>
           </section>
@@ -133,13 +158,13 @@ export default function Dashboard() {
                     </p>
                   </div>
 
-                  <DistrictSearch 
+                  <DistrictSearch
                     onDistrictSelect={async (district) => {
                       setSelectedDistrict(district);
                       setLoadingDetail(true);
                       setDistrictDetail(null);
                       setDistrictNotFound(false);
-                      
+
                       try {
                         const response = await fetch(`/api/districts/${district.slug}`);
                         if (response.ok) {
@@ -237,14 +262,12 @@ export default function Dashboard() {
                           </p>
                         </div>
                       </div>
-                      <a
-                        href="https://tree-nation.com/plant/myself"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-md hover:bg-gray-800 transition-colors text-center"
+                      <button
+                        onClick={() => router.push('/donate')}
+                        className="w-full px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-md hover:bg-gray-800 transition-colors"
                       >
                         Donate Now
-                      </a>
+                      </button>
                     </div>
 
                     {/* View Leaderboard */}
@@ -282,4 +305,3 @@ export default function Dashboard() {
     </>
   );
 }
-

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { LeaderboardEntry } from '@/lib/types';
 
+// Cache for 5 minutes (300 seconds) to reduce Firestore quota usage
+export const revalidate = 300;
+
 function timestampToDate(value: any): Date {
     if (!value) return new Date();
     if (typeof value.toDate === 'function') return value.toDate();
@@ -121,7 +124,7 @@ export async function GET(request: Request) {
                 const existingForestTrees = data.existingForestTrees || 0;
                 const userPlanted = data.totalTreesPlanted || 0;
                 const userDonated = data.totalTreesDonated || 0;
-                
+
                 // Total = Existing forest + User planted + User donated
                 current.totalTrees = existingForestTrees + userPlanted + userDonated;
                 current.totalTreesPlanted = userPlanted;
@@ -156,7 +159,7 @@ export async function GET(request: Request) {
             const soilAdjustment = calculateSoilTreeAdjustment(avgSoil);
             const adjustedTreeSupply = BASE_TREE_O2_SUPPLY_KG_PER_YEAR * soilAdjustment;
             const o2Supply = data.totalTrees * adjustedTreeSupply;
-            
+
             // Also calculate O2 from existing forests separately
             const existingForestO2 = (data.existingForestTrees || 0) * adjustedTreeSupply;
 
@@ -210,7 +213,7 @@ export async function GET(request: Request) {
             ranked.slice(0, limitParam).map((entry) => {
                 if (!leaderboardMap.has(entry.state)) return Promise.resolve();
                 const entryRef = adminDb.collection('leaderboard').doc(entry.id);
-                return entryRef.update({ 
+                return entryRef.update({
                     rank: entry.rank,
                     oxygenOffset: entry.o2Supply,
                     lastUpdated: new Date(),

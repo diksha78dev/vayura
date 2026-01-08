@@ -1,29 +1,31 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 
+// Cache for 5 minutes (300 seconds) to reduce Firestore quota usage
+export const revalidate = 300;
+
 export async function GET() {
     try {
-        // Get total districts
-        const districtsSnapshot = await adminDb.collection('districts').get();
-        const totalDistricts = districtsSnapshot.size;
+        // Read from pre-aggregated stats document
+        const statsDoc = await adminDb.collection('aggregated_stats').doc('global').get();
 
-        // Get total trees and oxygen from leaderboard (state-level aggregation)
-        const leaderboardSnapshot = await adminDb.collection('leaderboard').get();
-        
-        let totalTrees = 0;
-        let totalOxygen = 0;
+        if (!statsDoc.exists) {
+            // Fallback: return zeros if aggregated stats not yet created
+            // Stats will be populated on first cron run
+            console.warn('Aggregated stats document not found. Run /api/cron/update-stats to initialize.');
+            return NextResponse.json({
+                totalDistricts: 0,
+                totalTrees: 0,
+                totalOxygen: 0,
+            });
+        }
 
-        leaderboardSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            totalTrees += data.totalTrees || 0;
-            // Use totalO2Supply if available, otherwise fallback to oxygenOffset
-            totalOxygen += data.totalO2Supply || data.oxygenOffset || 0;
-        });
+        const data = statsDoc.data();
 
         return NextResponse.json({
-            totalDistricts,
-            totalTrees,
-            totalOxygen,
+            totalDistricts: data?.totalDistricts || 0,
+            totalTrees: data?.totalTrees || 0,
+            totalOxygen: data?.totalOxygen || 0,
         });
     } catch (error) {
         console.error('Error fetching stats:', error);
@@ -33,4 +35,3 @@ export async function GET() {
         );
     }
 }
-
