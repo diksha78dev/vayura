@@ -393,6 +393,18 @@ Always verify critical information with official sources and domain experts.
 - **Issues**: [GitHub Issues](https://github.com/manasdutta04/vayura/issues)
 - **Contributions**: [See CONTRIBUTING.md](./CONTRIBUTING.md)
 
+##  Creators
+
+- Developed by [Manas Dutta](https://github.com/manasdutta04)
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+Thanks to these amazing people <3
+
 ---
 
 **Made with care for a greener India**
