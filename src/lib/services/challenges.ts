@@ -470,7 +470,12 @@ export async function createChallenge(
         updatedAt: now,
     };
 
-    const docRef = await db.collection(CHALLENGES_COLLECTION).add(challengeData);
+    // Remove undefined values to prevent Firestore errors
+    const cleanedData = Object.fromEntries(
+        Object.entries(challengeData).filter(([_, value]) => value !== undefined)
+    );
+
+    const docRef = await db.collection(CHALLENGES_COLLECTION).add(cleanedData);
 
     return {
         id: docRef.id,
