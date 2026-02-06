@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, Link } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { getUserProfile } from '@/lib/utils/user-profile';
 import { UserProfile } from '@/lib/types/firestore';
 import { User, Mail, Calendar, Edit3, Camera, LogOut, Trash2 } from 'lucide-react';
-import Link from 'next/link';
 
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();

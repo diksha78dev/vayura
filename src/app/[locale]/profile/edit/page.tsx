@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, Link } from '@/i18n/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Header } from '@/components/ui/header';
 import { Footer } from '@/components/ui/footer';
@@ -10,7 +10,6 @@ import { updateUserProfileFields, getUserProfile } from '@/lib/utils/user-profil
 import { uploadProfileImage } from '@/lib/utils/storage';
 import { UserProfile } from '@/lib/types/firestore';
 import { User, Mail, Camera, Save, ArrowLeft, Upload, X } from 'lucide-react';
-import Link from 'next/link';
 
 export default function EditProfilePage() {
   const { user, loading, updateUserProfile } = useAuth();
