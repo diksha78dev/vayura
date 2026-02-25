@@ -28,79 +28,75 @@ export function calculateBadges(
 
     const hasBadge = (type: BadgeType) => badges.some(b => b.type === type);
 
-    // Green Starter - First verified contribution
-    if (verifiedTrees >= 1 && !hasBadge('GREEN_STARTER')) {
+    // Seedling - First verified contribution
+    if (verifiedTrees >= 1 && !hasBadge('seedling')) {
         badges.push({
-            id: `badge_green_starter_${Date.now()}`,
-            type: 'GREEN_STARTER',
-            name: BADGE_DEFINITIONS.GREEN_STARTER.name,
-            description: BADGE_DEFINITIONS.GREEN_STARTER.description,
-            icon: BADGE_DEFINITIONS.GREEN_STARTER.icon,
+            id: `badge_seedling_${Date.now()}`,
+            type: 'seedling',
+            name: BADGE_DEFINITIONS.seedling.name,
+            description: BADGE_DEFINITIONS.seedling.description,
+            icon: BADGE_DEFINITIONS.seedling.icon,
             earnedAt: now,
         });
     }
 
-    // Oxygen Guardian - 10+ verified trees
-    if (verifiedTrees >= 10 && !hasBadge('OXYGEN_GUARDIAN')) {
+    // Green Thumb - 5+ verified trees
+    if (verifiedTrees >= 5 && !hasBadge('green_thumb')) {
         badges.push({
-            id: `badge_oxygen_guardian_${Date.now()}`,
-            type: 'OXYGEN_GUARDIAN',
-            name: BADGE_DEFINITIONS.OXYGEN_GUARDIAN.name,
-            description: BADGE_DEFINITIONS.OXYGEN_GUARDIAN.description,
-            icon: BADGE_DEFINITIONS.OXYGEN_GUARDIAN.icon,
+            id: `badge_green_thumb_${Date.now()}`,
+            type: 'green_thumb',
+            name: BADGE_DEFINITIONS.green_thumb.name,
+            description: BADGE_DEFINITIONS.green_thumb.description,
+            icon: BADGE_DEFINITIONS.green_thumb.icon,
             earnedAt: now,
         });
     }
 
-    // Eco Warrior - 50+ verified trees
-    if (verifiedTrees >= 50 && !hasBadge('ECO_WARRIOR')) {
+    // Eco Warrior - 25+ verified trees
+    if (verifiedTrees >= 25 && !hasBadge('eco_warrior')) {
         badges.push({
             id: `badge_eco_warrior_${Date.now()}`,
-            type: 'ECO_WARRIOR',
-            name: BADGE_DEFINITIONS.ECO_WARRIOR.name,
-            description: BADGE_DEFINITIONS.ECO_WARRIOR.description,
-            icon: BADGE_DEFINITIONS.ECO_WARRIOR.icon,
+            type: 'eco_warrior',
+            name: BADGE_DEFINITIONS.eco_warrior.name,
+            description: BADGE_DEFINITIONS.eco_warrior.description,
+            icon: BADGE_DEFINITIONS.eco_warrior.icon,
             earnedAt: now,
         });
     }
 
-    // Forest Legend - 100+ verified trees
-    if (verifiedTrees >= 100 && !hasBadge('FOREST_LEGEND')) {
+    // Oxygen Hero - 50+ verified trees
+    if (verifiedTrees >= 50 && !hasBadge('oxygen_hero')) {
         badges.push({
-            id: `badge_forest_legend_${Date.now()}`,
-            type: 'FOREST_LEGEND',
-            name: BADGE_DEFINITIONS.FOREST_LEGEND.name,
-            description: BADGE_DEFINITIONS.FOREST_LEGEND.description,
-            icon: BADGE_DEFINITIONS.FOREST_LEGEND.icon,
+            id: `badge_oxygen_hero_${Date.now()}`,
+            type: 'oxygen_hero',
+            name: BADGE_DEFINITIONS.oxygen_hero.name,
+            description: BADGE_DEFINITIONS.oxygen_hero.description,
+            icon: BADGE_DEFINITIONS.oxygen_hero.icon,
             earnedAt: now,
         });
     }
 
-    // District Champion - Top contributor in district
-    if (districtRank === 1 && districtInfo && !hasBadge('DISTRICT_CHAMPION')) {
+    // Forest Guardian - 100+ verified trees
+    if (verifiedTrees >= 100 && !hasBadge('forest_guardian')) {
         badges.push({
-            id: `badge_district_champion_${districtInfo.id}_${Date.now()}`,
-            type: 'DISTRICT_CHAMPION',
-            name: BADGE_DEFINITIONS.DISTRICT_CHAMPION.name,
-            description: BADGE_DEFINITIONS.DISTRICT_CHAMPION.description,
-            icon: BADGE_DEFINITIONS.DISTRICT_CHAMPION.icon,
+            id: `badge_forest_guardian_${Date.now()}`,
+            type: 'forest_guardian',
+            name: BADGE_DEFINITIONS.forest_guardian.name,
+            description: BADGE_DEFINITIONS.forest_guardian.description,
+            icon: BADGE_DEFINITIONS.forest_guardian.icon,
             earnedAt: now,
-            districtId: districtInfo.id,
-            districtName: districtInfo.name,
-            state: districtInfo.state,
         });
     }
 
-    // State Champion - Top contributor in state
-    if (stateRank === 1 && districtInfo && !hasBadge('STATE_CHAMPION')) {
+    // Master Planter - 250+ verified trees
+    if (verifiedTrees >= 250 && !hasBadge('master_planter')) {
         badges.push({
-            id: `badge_state_champion_${districtInfo.state}_${Date.now()}`,
-            type: 'STATE_CHAMPION',
-            name: BADGE_DEFINITIONS.STATE_CHAMPION.name,
-            description: BADGE_DEFINITIONS.STATE_CHAMPION.description,
-            icon: BADGE_DEFINITIONS.STATE_CHAMPION.icon,
+            id: `badge_master_planter_${Date.now()}`,
+            type: 'master_planter',
+            name: BADGE_DEFINITIONS.master_planter.name,
+            description: BADGE_DEFINITIONS.master_planter.description,
+            icon: BADGE_DEFINITIONS.master_planter.icon,
             earnedAt: now,
-            state: districtInfo.state,
         });
     }
 

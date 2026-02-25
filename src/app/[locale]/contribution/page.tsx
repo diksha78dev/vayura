@@ -217,8 +217,8 @@ export default function ContributionPage() {
                                 <div className="mt-4 pt-4 border-t border-gray-100">
                                     <NextBadgeProgress
                                         currentTrees={stats.totalTreesPlanted}
-                                        nextBadgeType="OXYGEN_GUARDIAN"
-                                        requiredTrees={10}
+                                        nextBadgeType="eco_warrior"
+                                        requiredTrees={25}
                                     />
                                 </div>
                             )}
@@ -226,7 +226,7 @@ export default function ContributionPage() {
                                 <div className="mt-4 pt-4 border-t border-gray-100">
                                     <NextBadgeProgress
                                         currentTrees={stats.totalTreesPlanted}
-                                        nextBadgeType="ECO_WARRIOR"
+                                        nextBadgeType="oxygen_hero"
                                         requiredTrees={50}
                                     />
                                 </div>

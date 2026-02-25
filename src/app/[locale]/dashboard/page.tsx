@@ -242,9 +242,6 @@ export default function Dashboard() {
                         setLoadingDetail(false);
                       }
                     }}
-                    districtNotFound={districtNotFound}
-                    notFoundDistrictName={selectedDistrict?.name}
-                    loadingDistrict={loadingDetail}
                   />
                 </div>
               </section>

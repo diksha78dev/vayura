@@ -62,8 +62,8 @@ class OxygenService {
           district_name: districtName,
           population: districtData?.population || 1000000,
           aqi,
-          soil_quality: districtData?.soil_quality || 70,
-          disaster_frequency: districtData?.disaster_frequency || 2,
+          soil_quality: 70,
+          disaster_frequency: 2,
         });
 
         const duration = performance.now() - start;
