@@ -67,6 +67,7 @@ const tierIconColors: Record<string, string> = {
 // Badge Component
 function BadgeDisplay({ badge, size = 'sm' }: { badge: Badge; size?: 'sm' | 'md' | 'lg' }) {
     const definition = BADGE_DEFINITIONS[badge.type];
+    if (!definition) return null;
     const sizeClasses = {
         sm: 'w-4 h-4',
         md: 'w-5 h-5',

@@ -39,13 +39,13 @@ async function getDistrictDetail(slug: string): Promise<DistrictDetail | null> {
 }
 
 type DistrictPageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: DistrictPageProps) {
-  const slug = params.slug;
+  const { slug } = await params;
   const data = await getDistrictDetail(slug);
 
   if (!data) {
@@ -94,7 +94,7 @@ export async function generateMetadata({ params }: DistrictPageProps) {
 export default async function DistrictPage(
   { params }: DistrictPageProps
 ) {
-  const slug = params.slug;
+  const { slug } = await params;
   const t = await getTranslations('district');
 
   if (!slug) {

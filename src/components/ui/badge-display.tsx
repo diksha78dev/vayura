@@ -68,6 +68,7 @@ function getBadgeIcon(iconName: string, className: string): ReactNode {
 
 export function BadgeIcon({ badge, size = 'sm', showTooltip = true }: BadgeDisplayProps) {
     const definition = BADGE_DEFINITIONS[badge.type];
+    if (!definition) return null;
     const iconColor = tierIconColors[definition.tier];
 
     return (
@@ -82,6 +83,7 @@ export function BadgeIcon({ badge, size = 'sm', showTooltip = true }: BadgeDispl
 
 export function BadgeCard({ badge, size = 'md' }: BadgeDisplayProps) {
     const definition = BADGE_DEFINITIONS[badge.type];
+    if (!definition) return null;
 
     return (
         <div
