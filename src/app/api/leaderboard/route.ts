@@ -8,24 +8,35 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const limitParam = parseInt(searchParams.get('limit') || '35', 10);
+        const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+        const pageSize = Math.min(50, Math.max(10, parseInt(searchParams.get('pageSize') || '10', 10)));
 
-        // Simple optimized query: fetched pre-calculated ranks
-        // This reduces reads from ~1000+ (all districts) to just the number of states (requested limit)
+        // Fetch all valid entries
         const snapshot = await adminDb.collection('leaderboard')
             .orderBy('rank', 'asc')
-            .limit(limitParam)
             .get();
 
-        const leaderboard = snapshot.docs
+        const allEntries = snapshot.docs
             .map((doc: QueryDocumentSnapshot) => ({
                 id: doc.id,
                 ...doc.data()
             } as LeaderboardEntry))
-            // Filter out invalid entries without state names
             .filter((entry) => entry.state && entry.state.trim().length > 0);
 
-        return NextResponse.json(leaderboard, {
+        const totalCount = allEntries.length;
+        const totalPages = Math.ceil(totalCount / pageSize);
+        const startIdx = (page - 1) * pageSize;
+        const endIdx = startIdx + pageSize;
+
+        const leaderboard = allEntries.slice(startIdx, endIdx);
+
+        return NextResponse.json({
+            data: leaderboard,
+            total: totalCount,
+            page,
+            pageSize,
+            totalPages
+        }, {
             headers: {
                 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=600',
             },
