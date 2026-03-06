@@ -11,24 +11,27 @@ export async function GET(request: Request) {
         const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
         const pageSize = Math.min(50, Math.max(10, parseInt(searchParams.get('pageSize') || '10', 10)));
 
-        // Fetch all valid entries
-        const snapshot = await adminDb.collection('leaderboard')
+        // Get total count
+        const countSnapshot = await adminDb.collection('leaderboard')
             .orderBy('rank', 'asc')
             .get();
 
-        const allEntries = snapshot.docs
-            .map((doc: QueryDocumentSnapshot) => ({
-                id: doc.id,
-                ...doc.data()
-            } as LeaderboardEntry))
-            .filter((entry) => entry.state && entry.state.trim().length > 0);
+        const allDocs = countSnapshot.docs.filter((doc) => {
+            const data = doc.data();
+            return data.state && data.state.trim().length > 0;
+        });
 
-        const totalCount = allEntries.length;
+        const totalCount = allDocs.length;
         const totalPages = Math.ceil(totalCount / pageSize);
-        const startIdx = (page - 1) * pageSize;
-        const endIdx = startIdx + pageSize;
 
-        const leaderboard = allEntries.slice(startIdx, endIdx);
+        // Server-side pagination: skip to the page offset
+        const startIdx = (page - 1) * pageSize;
+        const paginatedDocs = allDocs.slice(startIdx, startIdx + pageSize);
+
+        const leaderboard = paginatedDocs.map((doc: QueryDocumentSnapshot) => ({
+            id: doc.id,
+            ...doc.data()
+        } as LeaderboardEntry));
 
         return NextResponse.json({
             data: leaderboard,
